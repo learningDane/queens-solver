@@ -4,7 +4,7 @@
 This module implements functions to solve the classic 8-queens problem.
 """
 
-def is_safe(board, row, col):
+def is_safe(board: list[int], row:int, col:int) -> bool:
     """
     Check if a queen can be placed at position (row, col) without being threatened.
 
@@ -19,8 +19,32 @@ def is_safe(board, row, col):
     Returns:
         bool: True if it's safe to place a queen at position (row, col), False otherwise
     """
-    # TODO: Implement this function
-    pass
+    # IPOTESI: la nuova queen va inserita in row prossima (in ordine crescente) riga
+    # rispetto alla is_valid_solution() questa funzione non deve controllare che i numeri di colonna siano minori di len, perché la lunghezza della board non è ancora definita
+    size = len(board)
+    if size <= row:
+        board.append(col)
+        size += 1
+    else:
+        board[row] = col
+    # la condizione che ci sia una queen per riga è già soddisfatta
+
+    # controlla che ci sia UNA SOLA queen per colonna
+    if len(set(board[:row+1])) != row+1: # controllo che ogni numero appaia al più una volta
+        return False
+
+    # controllo le diagonali
+    # O(n)
+    dif_set = set()
+    sum_set = set()
+    for i, val in enumerate(board[:row+1]): # per ogni riga
+        dif = val - i # questo numero può apparire una volta sola nel set delle dif
+        sum = val + i # questo numero può apparire una volta sola nel set delle sum
+        if dif in dif_set or sum in sum_set: # il numero è gia presente in lista
+            return False
+        dif_set.add(dif)
+        sum_set.add(sum)
+    return True
 
 def solve_queens(n=8):
     """
@@ -33,8 +57,7 @@ def solve_queens(n=8):
         list or None: A 1D array representing a solution, where solution[i] is the
                      column position of the queen in row i, or None if no solution exists
     """
-    # TODO: Implement this function using backtracking
-    pass
+
 
 def find_all_solutions(n=8):
     """
@@ -100,8 +123,19 @@ def is_valid_solution(board:list[int])->bool:
     # la condizione che ci sia una queen per riga è già soddisfatta
     # 1. controllo che la board sia > 3x3
     size = len(board)
-    if size < 4:
-        return False
+    # -------
+    match len:
+        case 0:
+            return False
+        case 2:
+            return False
+        case 3:
+            return False
+        case 1:
+            if board[0] == 0:
+                return True
+            return not board[0]
+
     # 2. controlla che la board sia valida
     for i in board:
         if i >= size: # ogni numero deve essere minore della dimensione della board [0:size-1]
