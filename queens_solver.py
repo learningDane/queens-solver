@@ -57,29 +57,11 @@ def solve_queens(n:int=8) -> list[int] | None:
         list or None: A 1D array representing a solution, where solution[i] is the
                      column position of the queen in row i, or None if no solution exists
     """
-    # controllo preliminare sulla dimenisone della scacchiera
-    match n:
-        case 0 | 2 | 3:
-            return None
-        case 1:
-            return [0]
-
-    board = [-1]*n
-    row = 0
-
-    # backtracking:
-    while True:
-        match _trova_safe(n,board,row):
-            case False:
-                if row == 0:
-                    return None
-                row -= 1
-                continue
-            case True:
-                if row == n-1:
-                    return board
-                row += 1
-                board[row] = -1
+    ret = _find_solutions(n, find_all=False)
+    if len(ret) == 0:
+        return None
+    else:
+        return ret
 
 def _trova_safe(n:int, board: list[int], row:int) -> bool:
     for i in range(board[row]+1,n):
@@ -88,8 +70,40 @@ def _trova_safe(n:int, board: list[int], row:int) -> bool:
             return True
     return False
 
+def _find_solutions(n:int, find_all: bool)-> list[int]:
+    # controllo preliminare sulla dimenisone della scacchiera
+    match n:
+        case 0 | 2 | 3:
+            return []
+        case 1:
+            return [0]
 
-def find_all_solutions(n=8):
+    board = [-1]*n
+    row = 0
+    solutions = []
+
+    # backtracking:
+    while True:
+        match _trova_safe(n,board,row):
+            case False:
+                if row == 0:
+                    if not find_all:
+                        return []
+                    else:
+                        return solutions
+                row -= 1
+                continue
+            case True:
+                if row == n-1: # ho trovato una soluzione
+                    if not find_all:
+                        return board
+                    else:
+                        solutions.append(board.copy())
+                        continue
+                row += 1
+                board[row] = -1
+
+def find_all_solutions(n=8) -> list:
     """
     Find all solutions to the n-queens problem.
 
@@ -100,8 +114,7 @@ def find_all_solutions(n=8):
         list: A list of solutions, where each solution is a 1D array where
               solution[i] is the column position of the queen in row i
     """
-    # TODO: Implement this function
-    pass
+    return _find_solutions(n, find_all=True)
 
 def board_to_string(board:list[int])->str:
     """
@@ -114,16 +127,16 @@ def board_to_string(board:list[int])->str:
     Returns:
         str: A string representation of the board with 'Q' for queens and '.' for empty squares
     """
-    str = ""
+    stringa = ""
     n = len(board)
     for i in board: # per ogni riga
         for j in range(0,n): # per ogni colonna
             if j == i:
-                str += "Q"
+                stringa += "Q"
             else:
-                str += "."
-        str += '\n' # newline
-    return str
+                stringa += "."
+        stringa += '\n' # newline
+    return stringa
 
 def count_solutions(n=8):
     """
@@ -135,9 +148,7 @@ def count_solutions(n=8):
     Returns:
         int: The number of solutions
     """
-    # TODO: Implement this function
-    # Hint: You can reuse find_all_solutions or implement a more efficient version
-    pass
+    return len(find_all_solutions(n))
 
 def is_valid_solution(board:list[int])->bool:
     """
@@ -154,7 +165,7 @@ def is_valid_solution(board:list[int])->bool:
     # 1. controllo che la board sia > 3x3
     size = len(board)
     # -------
-    match len:
+    match size:
         case 0:
             return False
         case 2:
@@ -162,13 +173,11 @@ def is_valid_solution(board:list[int])->bool:
         case 3:
             return False
         case 1:
-            if board[0] == 0:
-                return True
             return not board[0]
 
     # 2. controlla che la board sia valida
     for i in board:
-        if i >= size: # ogni numero deve essere minore della dimensione della board [0:size-1]
+        if i >= size or i < 0: # ogni numero deve essere minore della dimensione della board [0:size-1]
             return False
     # 3. controlla che ci sia UNA SOLA queen per colonna
     if len(set(board)) != size: # controllo che ogni numero appaia al più una volta
@@ -185,5 +194,3 @@ def is_valid_solution(board:list[int])->bool:
         dif_set.add(dif)
         sum_set.add(sum)
     return True
-
-print(is_valid_solution([5,0,4,1,7,2,6,3]))
