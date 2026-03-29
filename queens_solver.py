@@ -46,7 +46,7 @@ def is_safe(board: list[int], row:int, col:int) -> bool:
         sum_set.add(sum)
     return True
 
-def solve_queens(n=8):
+def solve_queens(n:int=8) -> list[int] | None:
     """
     Solve the n-queens problem and return a solution if one exists.
 
@@ -57,6 +57,36 @@ def solve_queens(n=8):
         list or None: A 1D array representing a solution, where solution[i] is the
                      column position of the queen in row i, or None if no solution exists
     """
+    # controllo preliminare sulla dimenisone della scacchiera
+    match n:
+        case 0 | 2 | 3:
+            return None
+        case 1:
+            return [0]
+
+    board = [-1]*n
+    row = 0
+
+    # backtracking:
+    while True:
+        match _trova_safe(n,board,row):
+            case False:
+                if row == 0:
+                    return None
+                row -= 1
+                continue
+            case True:
+                if row == n-1:
+                    return board
+                row += 1
+                board[row] = -1
+
+def _trova_safe(n:int, board: list[int], row:int) -> bool:
+    for i in range(board[row]+1,n):
+        if is_safe(board, row, i): # trovata colonna safe per questa row
+            board[row] = i
+            return True
+    return False
 
 
 def find_all_solutions(n=8):
