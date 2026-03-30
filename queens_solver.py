@@ -62,36 +62,34 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
             return [[0]]
 
     board = [-1] * n
-    row = 0
     solutions = []
     _reset_sets()
 
-    while True:
-        if _trova_safe(n, board, row): # ho trovato una colonna safe
-            if row == n - 1: # ho trovato una soluzione
-                if not find_all:
-                    return [board]
+    def backtrack(row:int):
+        if _trova_safe(n, board, row): # ho trovato una colonna libera
+            col = board[row]
+            if row == n-1: # ho trovato una soluzione
                 solutions.append(board.copy())
-                # cerco altre soluzioni, quindi devo rimuovere la queen appena inserita
-                col = board[row]
+                if not find_all: # mi bastava trovare una soluzione
+                    return
+                else: # devo trovare altre soluzioni
+                    # rimuovo la queen
+                    cols_set.remove(col)
+                    diags_set.remove(col - row)
+                    antidiags_set.remove(col + row)
+                    return
+            else: # ho trovato una colonna libera ma non sono ancora ad una soluzione
+                backtrack(row+1)
+
                 cols_set.remove(col)
                 diags_set.remove(col - row)
                 antidiags_set.remove(col + row)
-            else:
-                row += 1
-                board[row] = -1
-        else: # non ho trovato colonne safe
-            if row == 0: # non ci sono soluzioni
-                return solutions
 
-            # backtrack
-            board[row] = -1
-            row -= 1
+                if solutions[0] and not find_all:
+                    return
 
-            col = board[row]
-            cols_set.remove(col)
-            diags_set.remove(col - row)
-            antidiags_set.remove(col + row)
+    backtrack(0)
+    return solutions
 
 def _trova_safe(n:int, board: list[int], row:int) -> bool:
     """
