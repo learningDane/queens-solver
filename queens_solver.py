@@ -110,10 +110,8 @@ def _trova_safe(n:int, board: list[int], row:int) -> bool:
         diag = i - row
         antidiag = i + row
         if diag in diags_set or antidiag in antidiags_set or i in cols_set:
-            found = False
+            continue
         else:
-            found = True
-        if found: # trovata colonna safe per questa row
             board[row] = i
             cols_set.add(i)
             diags_set.add(i-row)
