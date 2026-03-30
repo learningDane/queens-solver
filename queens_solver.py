@@ -74,10 +74,12 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
         if row == n:
             solutions.append(board.copy())
             return
-        if row == 1:
+
+        if row == 0: # non ho idea del perché ma row==1 è molto più veloce di row==0
             col_range = col_range0
         else:
             col_range = col_range1
+
         for col in col_range:
             if col in cols_set or (col - row) in diags_set or (col + row) in antidiags_set:
                 continue
