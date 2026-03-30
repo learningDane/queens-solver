@@ -90,35 +90,8 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
             diags_set.remove(col - row)
             antidiags_set.remove(col + row)
 
-
     backtrack(0)
     return solutions
-
-def _trova_safe(n:int, board: list[int], row:int) -> bool:
-    """
-    Find a safe column for the given row
-
-    Parameters:
-        n (int): Dimension of the board
-        board (list): A 1D array where board[i] represents the column position
-                     of the queen in row i
-        row (int): The row to check
-
-    Returns:
-        bool: True if a valid column is found, False otherwise
-    """
-    for i in range(board[row]+1,n):
-        diag = i - row
-        antidiag = i + row
-        if diag in diags_set or antidiag in antidiags_set or i in cols_set:
-            continue
-        else:
-            board[row] = i
-            cols_set.add(i)
-            diags_set.add(i-row)
-            antidiags_set.add(i+row)
-            return True
-    return False
 
 def _reset_sets():
     global cols_set
