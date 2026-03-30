@@ -61,32 +61,35 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
         case 1:
             return [[0]]
 
-    board = [-1] * n
     solutions = []
+    board = [-1] * n
+    global cols_set
+    global diags_set
+    global antidiags_set
     _reset_sets()
 
-    def backtrack(row:int):
-        if _trova_safe(n, board, row): # ho trovato una colonna libera
-            col = board[row]
-            if row == n-1: # ho trovato una soluzione
-                solutions.append(board.copy())
-                if not find_all: # mi bastava trovare una soluzione
-                    return
-                else: # devo trovare altre soluzioni
-                    # rimuovo la queen
-                    cols_set.remove(col)
-                    diags_set.remove(col - row)
-                    antidiags_set.remove(col + row)
-                    return
-            else: # ho trovato una colonna libera ma non sono ancora ad una soluzione
-                backtrack(row+1)
+    def backtrack(row: int):
+        if row == n:
+            solutions.append(board.copy())
+            return
 
-                cols_set.remove(col)
-                diags_set.remove(col - row)
-                antidiags_set.remove(col + row)
+        for col in range(n):
+            if col in cols_set or (col - row) in diags_set or (col + row) in antidiags_set:
+                continue
 
-                if solutions[0] and not find_all:
-                    return
+            board[row] = col
+            cols_set.add(col)
+            diags_set.add(col - row)
+            antidiags_set.add(col + row)
+
+            backtrack(row + 1)
+            if not find_all and solutions:
+                return
+
+            cols_set.remove(col)
+            diags_set.remove(col - row)
+            antidiags_set.remove(col + row)
+
 
     backtrack(0)
     return solutions
