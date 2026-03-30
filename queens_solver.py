@@ -67,12 +67,18 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
     diags_set = set()
     antidiags_set = set()
 
+    col_range0 = range(n+1//2 - 1, 0, -1) # conviene provare prima le colonne centrali: MIGLIORAMENTO NOTEVOLE
+    col_range1 = sorted(range(n), key=lambda x: abs(x - n/2)) # stessa cosa, provo prima le colonne centrali, MIGLIORAMENTO FOTONICO
+
     def backtrack(row: int):
         if row == n:
             solutions.append(board.copy())
             return
-
-        for col in range(n):
+        if row == 1:
+            col_range = col_range0
+        else:
+            col_range = col_range1
+        for col in col_range:
             if col in cols_set or (col - row) in diags_set or (col + row) in antidiags_set:
                 continue
 
@@ -83,13 +89,23 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
 
             backtrack(row + 1)
             if not find_all and solutions:
-                return
+                return # se sto eseguendo solve_queens devo ritornare il prima possibile
 
             cols_set.remove(col)
             diags_set.remove(col - row)
             antidiags_set.remove(col + row)
 
     backtrack(0)
+
+    if find_all:
+        mirrored = []
+        # prima mi sono fermato per non riesplorare casi simmetrici, ora devo inserire artificialmente queste soluzioni
+        for sol in solutions:
+            mirror = [n-1-col for col in sol]
+            if mirror not in solutions: # non è detto che mirror sia una nuova soluzione
+                mirrored.append(mirror)
+        solutions.extend(mirrored)
+
     return solutions
 
 def find_all_solutions(n=8) -> list[list[int]]:
@@ -183,3 +199,7 @@ def is_valid_solution(board:list[int])->bool:
         dif_set.add(dif)
         sum_set.add(sum)
     return True
+
+print(find_all_solutions(5))
+print(len(find_all_solutions(5)))
+print(count_solutions(5))
