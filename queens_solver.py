@@ -42,18 +42,47 @@ def solve_queens(n:int=8) -> list[int] | None:
     """
     match n:
         case 0 | 2 | 3:
-            return []
+            return None
         case 1:
             return [0]
 
     board = [-1] * n
     row = 0
-    solutions = []
     _reset_sets()
 
-    pass
+    while True:
+        if _trova_safe(n, board, row): # ho trovato una colonna safe
+            if row == n - 1: # ho trovato una soluzione
+                return board
+            else:
+                row += 1
+                board[row] = -1
+        else: # non ho trovato colonne safe
+            if row == 0: # non ci sono soluzioni
+                return None
+
+            # backtrack
+            board[row] = -1
+            row -= 1
+
+            col = board[row]
+            cols_set.remove(col)
+            diags_set.remove(col - row)
+            antidiags_set.remove(col + row)
 
 def _trova_safe(n:int, board: list[int], row:int) -> bool:
+    """
+    Find a safe column for the given row
+
+    Parameters:
+        n (int): Dimension of the board
+        board (list): A 1D array where board[i] represents the column position
+                     of the queen in row i
+        row (int): The row to check
+
+    Returns:
+        bool: True if a valid column is found, False otherwise
+    """
     for i in range(board[row]+1,n):
         if is_safe(board, row, i): # trovata colonna safe per questa row
             board[row] = i
