@@ -199,7 +199,3 @@ def is_valid_solution(board:list[int])->bool:
         dif_set.add(dif)
         sum_set.add(sum)
     return True
-
-print(find_all_solutions(5))
-print(len(find_all_solutions(5)))
-print(count_solutions(5))
