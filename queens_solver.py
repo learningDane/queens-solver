@@ -84,7 +84,13 @@ def _trova_safe(n:int, board: list[int], row:int) -> bool:
         bool: True if a valid column is found, False otherwise
     """
     for i in range(board[row]+1,n):
-        if is_safe(board, row, i): # trovata colonna safe per questa row
+        diag = i - row
+        antidiag = i + row
+        if diag in diags_set or antidiag in antidiags_set or i in cols_set:
+            found = False
+        else:
+            found = True
+        if found: # trovata colonna safe per questa row
             board[row] = i
             cols_set.add(i)
             diags_set.add(i-row)
