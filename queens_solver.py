@@ -3,6 +3,9 @@
 
 This module implements functions to solve the classic 8-queens problem.
 """
+cols_set = set()
+diags_set = set()
+antidiags_set = set()
 
 def is_safe(board: list[int], row:int, col:int) -> bool:
     """
@@ -19,21 +22,12 @@ def is_safe(board: list[int], row:int, col:int) -> bool:
     Returns:
         bool: True if it's safe to place a queen at position (row, col), False otherwise
     """
-    # IPOTESI: la nuova queen va inserita in row prossima (in ordine crescente) riga
-    # rispetto alla is_valid_solution() questa funzione non deve controllare che i numeri di colonna siano minori di len, perché la lunghezza della board non è ancora definita
-    for i in range(row):
-        placed_col = board[i] # controllo una colonna alla volta
-
-        # controlla le colonne
-        if placed_col == col:
-            return False
-
-        # Check diagonal conflict (difference in rows == difference in cols)
-        # controlla diagonali
-        if abs(placed_col - col) == abs(i - row):
-            return False
-
-    return True
+    diag = col - row
+    antidiag = col + row
+    if diag in diags_set or antidiag in antidiags_set or col in cols_set:
+        return False
+    else:
+        return True
 
 def solve_queens(n:int=8) -> list[int] | None:
     """
@@ -46,52 +40,38 @@ def solve_queens(n:int=8) -> list[int] | None:
         list or None: A 1D array representing a solution, where solution[i] is the
                      column position of the queen in row i, or None if no solution exists
     """
-    ret = _find_solutions(n, find_all=False)
-    if len(ret) == 0:
-        return None
-    else:
-        return ret
-
-def _trova_safe(n:int, board: list[int], row:int) -> bool:
-    for i in range(board[row]+1,n):
-        if is_safe(board, row, i): # trovata colonna safe per questa row
-            board[row] = i
-            return True
-    return False
-
-def _find_solutions(n:int, find_all: bool)-> list[int]:
-    # controllo preliminare sulla dimenisone della scacchiera
     match n:
         case 0 | 2 | 3:
             return []
         case 1:
             return [0]
 
-    board = [-1]*n
+    board = [-1] * n
     row = 0
     solutions = []
+    _reset_sets()
 
-    # backtracking:
-    while True:
-        if _trova_safe(n,board,row):
-            if row == n-1: # ho trovato una soluzione
-                if not find_all:
-                    return board
-                else:
-                    solutions.append(board.copy())
-                    continue
-            row += 1
-            board[row] = -1
-        else:
-            if row == 0:
-                if not find_all:
-                    return []
-                else:
-                    return solutions
-            row -= 1
-            continue
+    pass
 
-def find_all_solutions(n=8) -> list:
+def _trova_safe(n:int, board: list[int], row:int) -> bool:
+    for i in range(board[row]+1,n):
+        if is_safe(board, row, i): # trovata colonna safe per questa row
+            board[row] = i
+            cols_set.add(i)
+            diags_set.add(i-row)
+            antidiags_set.add(i+row)
+            return True
+    return False
+
+def _reset_sets():
+    global cols_set
+    global diags_set
+    global antidiags_set
+    cols_set = set()
+    diags_set = set()
+    antidiags_set = set()
+
+def find_all_solutions(n=8) -> None:#list:
     """
     Find all solutions to the n-queens problem.
 
@@ -102,7 +82,7 @@ def find_all_solutions(n=8) -> list:
         list: A list of solutions, where each solution is a 1D array where
               solution[i] is the column position of the queen in row i
     """
-    return _find_solutions(n, find_all=True)
+    pass
 
 def board_to_string(board:list[int])->str:
     """
@@ -182,6 +162,3 @@ def is_valid_solution(board:list[int])->bool:
         dif_set.add(dif)
         sum_set.add(sum)
     return True
-
-
-PROVAAAAAA
