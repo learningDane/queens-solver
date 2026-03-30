@@ -182,3 +182,5 @@ def is_valid_solution(board:list[int])->bool:
         dif_set.add(dif)
         sum_set.add(sum)
     return True
+
+prova
