@@ -22,12 +22,19 @@ def is_safe(board: list[int], row:int, col:int) -> bool:
     Returns:
         bool: True if it's safe to place a queen at position (row, col), False otherwise
     """
-    diag = col - row
-    antidiag = col + row
-    if diag in diags_set or antidiag in antidiags_set or col in cols_set:
-        return False
-    else:
-        return True
+    for i in range(row):
+        placed_col = board[i] # controllo una colonna alla volta
+
+        # controlla le colonne
+        if placed_col == col:
+            return False
+
+        # Check diagonal conflict (difference in rows == difference in cols)
+        # controlla diagonali
+        if abs(placed_col - col) == abs(i - row):
+            return False
+
+    return True
 
 def solve_queens(n:int=8) -> list[int] | None:
     """
@@ -40,26 +47,42 @@ def solve_queens(n:int=8) -> list[int] | None:
         list or None: A 1D array representing a solution, where solution[i] is the
                      column position of the queen in row i, or None if no solution exists
     """
+    ret = _find_solutions(n,find_all=False)
+    if ret == []:
+        return None
+    else:
+        # so che ret è una lista di liste
+        return ret[0]
+
+def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
     match n:
         case 0 | 2 | 3:
-            return None
+            return []
         case 1:
-            return [0]
+            return [[0]]
 
     board = [-1] * n
     row = 0
+    solutions = []
     _reset_sets()
 
     while True:
         if _trova_safe(n, board, row): # ho trovato una colonna safe
             if row == n - 1: # ho trovato una soluzione
-                return board
+                if not find_all:
+                    return [board]
+                solutions.append(board.copy())
+                # cerco altre soluzioni, quindi devo rimuovere la queen appena inserita
+                col = board[row]
+                cols_set.remove(col)
+                diags_set.remove(col - row)
+                antidiags_set.remove(col + row)
             else:
                 row += 1
                 board[row] = -1
         else: # non ho trovato colonne safe
             if row == 0: # non ci sono soluzioni
-                return None
+                return solutions
 
             # backtrack
             board[row] = -1
@@ -106,7 +129,7 @@ def _reset_sets():
     diags_set = set()
     antidiags_set = set()
 
-def find_all_solutions(n=8) -> None:#list:
+def find_all_solutions(n=8) -> list[list[int]]:
     """
     Find all solutions to the n-queens problem.
 
@@ -117,7 +140,7 @@ def find_all_solutions(n=8) -> None:#list:
         list: A list of solutions, where each solution is a 1D array where
               solution[i] is the column position of the queen in row i
     """
-    pass
+    return _find_solutions(n,find_all=True)
 
 def board_to_string(board:list[int])->str:
     """
@@ -141,7 +164,7 @@ def board_to_string(board:list[int])->str:
         stringa += '\n' # newline
     return stringa
 
-def count_solutions(n=8):
+def count_solutions(n=8) -> int:
     """
     Count the number of solutions to the n-queens problem.
 
