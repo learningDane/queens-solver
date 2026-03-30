@@ -67,8 +67,12 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
     diags_set = set()
     antidiags_set = set()
 
-    col_range0 = range(n+1//2 - 1, 0, -1) # conviene provare prima le colonne centrali: MIGLIORAMENTO NOTEVOLE
+    col_range0 = range((n+1)//2 - 1, 0, -1) # conviene provare prima le colonne centrali: MIGLIORAMENTO NOTEVOLE
     col_range1 = sorted(range(n), key=lambda x: abs(x - n/2)) # stessa cosa, provo prima le colonne centrali, MIGLIORAMENTO FOTONICO
+    # idea, pattern a cavallo?
+        # posiziono una queen
+        # alla prossima riga provo a mettere la queen a L rispetto alla scorsa
+        # se non va bene continuo come al solito
 
     def backtrack(row: int):
         if row == n:
