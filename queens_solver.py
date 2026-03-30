@@ -21,29 +21,18 @@ def is_safe(board: list[int], row:int, col:int) -> bool:
     """
     # IPOTESI: la nuova queen va inserita in row prossima (in ordine crescente) riga
     # rispetto alla is_valid_solution() questa funzione non deve controllare che i numeri di colonna siano minori di len, perché la lunghezza della board non è ancora definita
-    size = len(board)
-    if size <= row:
-        board.append(col)
-        size += 1
-    else:
-        board[row] = col
-    # la condizione che ci sia una queen per riga è già soddisfatta
+    for i in range(row):
+        placed_col = board[i] # controllo una colonna alla volta
 
-    # controlla che ci sia UNA SOLA queen per colonna
-    if len(set(board[:row+1])) != row+1: # controllo che ogni numero appaia al più una volta
-        return False
-
-    # controllo le diagonali
-    # O(n)
-    dif_set = set()
-    sum_set = set()
-    for i, val in enumerate(board[:row+1]): # per ogni riga
-        dif = val - i # questo numero può apparire una volta sola nel set delle dif
-        sum = val + i # questo numero può apparire una volta sola nel set delle sum
-        if dif in dif_set or sum in sum_set: # il numero è gia presente in lista
+        # controlla le colonne
+        if placed_col == col:
             return False
-        dif_set.add(dif)
-        sum_set.add(sum)
+
+        # Check diagonal conflict (difference in rows == difference in cols)
+        # controlla diagonali
+        if abs(placed_col - col) == abs(i - row):
+            return False
+
     return True
 
 def solve_queens(n:int=8) -> list[int] | None:
@@ -84,24 +73,23 @@ def _find_solutions(n:int, find_all: bool)-> list[int]:
 
     # backtracking:
     while True:
-        match _trova_safe(n,board,row):
-            case False:
-                if row == 0:
-                    if not find_all:
-                        return []
-                    else:
-                        return solutions
-                row -= 1
-                continue
-            case True:
-                if row == n-1: # ho trovato una soluzione
-                    if not find_all:
-                        return board
-                    else:
-                        solutions.append(board.copy())
-                        continue
-                row += 1
-                board[row] = -1
+        if _trova_safe(n,board,row):
+            if row == n-1: # ho trovato una soluzione
+                if not find_all:
+                    return board
+                else:
+                    solutions.append(board.copy())
+                    continue
+            row += 1
+            board[row] = -1
+        else:
+            if row == 0:
+                if not find_all:
+                    return []
+                else:
+                    return solutions
+            row -= 1
+            continue
 
 def find_all_solutions(n=8) -> list:
     """
