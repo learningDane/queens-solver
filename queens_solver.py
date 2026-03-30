@@ -63,10 +63,9 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
 
     solutions = []
     board = [-1] * n
-    global cols_set
-    global diags_set
-    global antidiags_set
-    _reset_sets()
+    cols_set = set()
+    diags_set = set()
+    antidiags_set = set()
 
     def backtrack(row: int):
         if row == n:
@@ -92,14 +91,6 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
 
     backtrack(0)
     return solutions
-
-def _reset_sets():
-    global cols_set
-    global diags_set
-    global antidiags_set
-    cols_set = set()
-    diags_set = set()
-    antidiags_set = set()
 
 def find_all_solutions(n=8) -> list[list[int]]:
     """
