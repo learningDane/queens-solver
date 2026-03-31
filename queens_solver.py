@@ -82,6 +82,7 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
             col_list = [L] + [elem for elem in col_range1 if elem != L and elem not in cols_set] # controllo come primo elemento la casella ad L dall'ultima queen
             # rimuovo subito dal set le colonne già usate
             # ho provato a rimuovere anche le colonne già sotto attacco diagonalmente ma tutti i calcoli sui set rallentavano il codice, seppur logicamente più veloce
+            # qualsiasi modo che ho provato per rendere questo codice meno verboso (per esempio togliere il 'or col in cols_set' è risultato in un punteggio peggiore)
 
         for col in col_list:
             if (col - row) in diags_set or (col + row) in antidiags_set or col in cols_set:
