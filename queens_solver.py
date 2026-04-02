@@ -71,7 +71,15 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
     antidiags_used = [False] * (2 * n - 1)
 
     col_range0 = range((n+1)//2 - 1, -1, -1) # conviene provare prima le colonne centrali: MIGLIORAMENTO NOTEVOLE
-    col_range = list(range(n))
+
+    # peggioro la complessità spaziale per migliorare quella temporale
+    base = list(range(n))
+    liste = [base]
+    for i in range(1,n):
+        lista = base.copy()
+        lista[0], lista[i] = lista[i], lista[0]
+        liste.append(lista)
+
 
     def backtrack(row: int):
         if row == n:
@@ -96,7 +104,7 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
                     antidiags_used[col + row] = False
             case _: # qualsiasi altra riga
                 L = (board[row-1] + 2) % n
-                for col in [L] + [c for c in col_range if c != L]:
+                for col in liste[L]:
                     if cols_used[col] or diags_used[col - row + n - 1] or antidiags_used[col + row]:
                         continue
                     else:
