@@ -72,18 +72,23 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
 
     col_range0 = range((n+1)//2 - 1, -1, -1) # conviene provare prima le colonne centrali: MIGLIORAMENTO NOTEVOLE
 
-    # peggioro la complessità spaziale per migliorare quella temporale
+    # caching delle possibili liste di colonne per ogni valore di n
     base = list(range(n))
     liste = [base]
     for i in range(1,n):
         lista = base.copy()
         lista[0], lista[i] = lista[i], lista[0]
         liste.append(lista)
+    # caching di n - 1, per non doverlo ricalcolare ogni volta
+    n_meno = n - 1
 
-    def backtrack(row: int):
+    def backtrack(row: int) -> bool:
         if row == n:
             solutions.append(board.copy())
-            return
+            if find_all:
+                return False
+            else:
+                return True
 
         match row:
             case 0: # prima riga
@@ -93,33 +98,32 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
                     diags_used[col - row + n - 1] = True
                     antidiags_used[col + row] = True
 
-                    backtrack(row + 1)
-                    if not find_all and solutions:
-                        return # se sto eseguendo solve_queens devo ritornare il prima possibile
+                    if backtrack(row + 1):
+                        return True
 
                     # backtrack
                     cols_used[col] = False
-                    diags_used[col - row + n - 1] = False
+                    diags_used[col - row + n_meno] = False
                     antidiags_used[col + row] = False
             case _: # qualsiasi altra riga
                 L = (board[row-1] + 2) % n
                 for col in liste[L]:
-                    if cols_used[col] or diags_used[col - row + n - 1] or antidiags_used[col + row]:
+                    if cols_used[col] or diags_used[col - row + n_meno] or antidiags_used[col + row]:
                         continue
                     else:
                         board[row] = col
                         cols_used[col] = True
-                        diags_used[col - row + n - 1] = True
+                        diags_used[col - row + n_meno] = True
                         antidiags_used[col + row] = True
 
-                        backtrack(row + 1)
-                        if not find_all and solutions:
-                            return # se sto eseguendo solve_queens devo ritornare il prima possibile
+                        if backtrack(row + 1):
+                            return True
 
                         # backtrack
                         cols_used[col] = False
-                        diags_used[col - row + n - 1] = False
+                        diags_used[col - row + n_meno] = False
                         antidiags_used[col + row] = False
+        return False
 
     backtrack(0)
 
