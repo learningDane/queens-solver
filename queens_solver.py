@@ -68,23 +68,21 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
     antidiags_set = set()
 
     col_range0 = range((n+1)//2 - 1, -1, -1) # conviene provare prima le colonne centrali: MIGLIORAMENTO NOTEVOLE
-    col_range1 = sorted(range(n), key=lambda x: abs(x - (n-1)/2)) # stessa cosa, provo prima le colonne centrali, MIGLIORAMENTO FOTONICO
+    col_range = sorted(range(n), key=lambda x: abs(x - (n-1)/2)) # stessa cosa, provo prima le colonne centrali, MIGLIORAMENTO FOTONICO
+    col_list = [col_range, col_range0]
 
     def backtrack(row: int):
         if row == n:
             solutions.append(board.copy())
             return
 
-        if row == 0:
-            col_list = col_range0
-        else:
-            L = (board[row-1]+2) % n # questa euristica migliora la velocità: (0.85 -> 0.1)
-            col_list = [L] + [elem for elem in col_range1 if elem != L and elem not in cols_set] # controllo come primo elemento la casella ad L dall'ultima queen
-            # rimuovo subito dal set le colonne già usate
-            # ho provato a rimuovere anche le colonne già sotto attacco diagonalmente ma tutti i calcoli sui set rallentavano il codice, seppur logicamente più veloce
-            # qualsiasi modo che ho provato per rendere questo codice meno verboso (per esempio togliere il 'or col in cols_set' è risultato in un punteggio peggiore)
+        L = (board[row-1]+2) % n # questa euristica migliora la velocità: (0.85 -> 0.1)
+        col_list[0] = [L] + [elem for elem in col_range if elem != L and elem not in cols_set] # controllo come primo elemento la casella ad L dall'ultima queen
+        # rimuovo subito dal set le colonne già usate
+        # ho provato a rimuovere anche le colonne già sotto attacco diagonalmente ma tutti i calcoli sui set rallentavano il codice, seppur logicamente più veloce
+        # qualsiasi modo che ho provato per rendere questo codice meno verboso (per esempio togliere il 'or col in cols_set' è risultato in un punteggio peggiore)
 
-        for col in col_list:
+        for col in col_list[not row]:
             if (col - row) in diags_set or (col + row) in antidiags_set or col in cols_set:
                 continue
 
