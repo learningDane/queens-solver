@@ -3,6 +3,7 @@
 
 This module implements functions to solve the classic 8-queens problem.
 """
+
 cols_set = set()
 diags_set = set()
 antidiags_set = set()
@@ -68,7 +69,7 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
     antidiags_set = set()
 
     col_range0 = range((n+1)//2 - 1, -1, -1) # conviene provare prima le colonne centrali: MIGLIORAMENTO NOTEVOLE
-    col_range = sorted(range(n), key=lambda x: abs(x - (n-1)/2)) # stessa cosa, provo prima le colonne centrali, MIGLIORAMENTO FOTONICO
+    col_range = range(n)
     col_list = [[], col_range0] # col_list[0] = lista per righe != 0
 
     def backtrack(row: int):
