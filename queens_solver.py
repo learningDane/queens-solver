@@ -80,7 +80,6 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
         lista[0], lista[i] = lista[i], lista[0]
         liste.append(lista)
 
-
     def backtrack(row: int):
         if row == n:
             solutions.append(board.copy())
