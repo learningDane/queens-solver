@@ -64,56 +64,55 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
 
     solutions = []
     board = [-1] * n
-    cols_set = set() # rendere array booleani?
-    diags_set = set()
-    antidiags_set = set()
+
+    # array booleani
+    cols_used = [False] * n
+    diags_used = [False] * (2 * n - 1)
+    antidiags_used = [False] * (2 * n - 1)
 
     col_range0 = range((n+1)//2 - 1, -1, -1) # conviene provare prima le colonne centrali: MIGLIORAMENTO NOTEVOLE
-    col_range = range(n)
-    col_list = [[], col_range0] # col_list[0] = lista per righe != 0
+    col_range = list(range(n))
 
     def backtrack(row: int):
         if row == n:
             solutions.append(board.copy())
             return
 
-        # trova colonna per salto a L da ultima queen
-        L = (board[row-1] + 2) % n
+        match row:
+            case 0: # prima riga
+                for col in col_range0:
+                    board[row] = col
+                    cols_used[col] = True
+                    diags_used[col - row + n - 1] = True
+                    antidiags_used[col + row] = True
 
-        # salto a L è safe?
-        is_L_safe = (
-            L not in cols_set
-            and (L - row) not in diags_set
-            and (L + row) not in antidiags_set
-        )
+                    backtrack(row + 1)
+                    if not find_all and solutions:
+                        return # se sto eseguendo solve_queens devo ritornare il prima possibile
 
-        # determino lista di colonne disponibili
-        col_list[0] = ([L] if is_L_safe else []) + [
-            c for c in col_range
-            if
-                c != L
-                and c not in cols_set
-                and (c - row) not in diags_set
-                and (c + row) not in antidiags_set
-        ]
+                    # backtrack
+                    cols_used[col] = False
+                    diags_used[col - row + n - 1] = False
+                    antidiags_used[col + row] = False
+            case _: # qualsiasi altra riga
+                L = (board[row-1] + 2) % n
+                for col in [L] + [c for c in col_range if c != L]:
+                    if cols_used[col] or diags_used[col - row + n - 1] or antidiags_used[col + row]:
+                        continue
+                    else:
+                        board[row] = col
+                        cols_used[col] = True
+                        diags_used[col - row + n - 1] = True
+                        antidiags_used[col + row] = True
 
-        for col in col_list[not row]:
+                        backtrack(row + 1)
+                        if not find_all and solutions:
+                            return # se sto eseguendo solve_queens devo ritornare il prima possibile
 
-            # aggiungo la queen in col
-            board[row] = col
-            cols_set.add(col)
-            diags_set.add(col - row)
-            antidiags_set.add(col + row)
-
-            # avanza di riga
-            backtrack(row + 1)
-            if not find_all and solutions:
-                return # se sto eseguendo solve_queens devo ritornare il prima possibile
-
-            # backtrack
-            cols_set.remove(col)
-            diags_set.remove(col - row)
-            antidiags_set.remove(col + row)
+                        # backtrack
+                        cols_used[col] = False
+                        diags_used[col - row + n - 1] = False
+                        antidiags_used[col + row] = False
 
     backtrack(0)
 
