@@ -69,32 +69,47 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
 
     col_range0 = range((n+1)//2 - 1, -1, -1) # conviene provare prima le colonne centrali: MIGLIORAMENTO NOTEVOLE
     col_range = sorted(range(n), key=lambda x: abs(x - (n-1)/2)) # stessa cosa, provo prima le colonne centrali, MIGLIORAMENTO FOTONICO
-    col_list = [col_range, col_range0]
+    col_list = [[], col_range0] # col_list[0] = lista per righe != 0
 
     def backtrack(row: int):
         if row == n:
             solutions.append(board.copy())
             return
 
-        L = (board[row-1]+2) % n # questa euristica migliora la velocità: (0.85 -> 0.1)
-        col_list[0] = [L] + [elem for elem in col_range if elem != L and elem not in cols_set] # controllo come primo elemento la casella ad L dall'ultima queen
-        # rimuovo subito dal set le colonne già usate
-        # ho provato a rimuovere anche le colonne già sotto attacco diagonalmente ma tutti i calcoli sui set rallentavano il codice, seppur logicamente più veloce
-        # qualsiasi modo che ho provato per rendere questo codice meno verboso (per esempio togliere il 'or col in cols_set' è risultato in un punteggio peggiore)
+        # trova colonna per salto a L da ultima queen
+        L = (board[row-1] + 2) % n
+
+        # salto a L è safe?
+        is_L_safe = (
+            L not in cols_set
+            and (L - row) not in diags_set
+            and (L + row) not in antidiags_set
+        )
+
+        # determino lista di colonne disponibili
+        col_list[0] = ([L] if is_L_safe else []) + [
+            c for c in col_range
+            if
+                c != L
+                and c not in cols_set
+                and (c - row) not in diags_set
+                and (c + row) not in antidiags_set
+        ]
 
         for col in col_list[not row]:
-            if (col - row) in diags_set or (col + row) in antidiags_set or col in cols_set:
-                continue
 
+            # aggiungo la queen in col
             board[row] = col
             cols_set.add(col)
             diags_set.add(col - row)
             antidiags_set.add(col + row)
 
+            # avanza di riga
             backtrack(row + 1)
             if not find_all and solutions:
                 return # se sto eseguendo solve_queens devo ritornare il prima possibile
 
+            # backtrack
             cols_set.remove(col)
             diags_set.remove(col - row)
             antidiags_set.remove(col + row)
