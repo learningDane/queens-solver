@@ -1,14 +1,180 @@
 """
-8-Queens Problem Solver
+8-Queens Problem Solver (Object-Oriented Version)
 
-This module implements functions to solve the classic 8-queens problem.
+This module implements functions and a class to solve the classic 8-queens problem.
 """
 
-cols_set = set()
-diags_set = set()
-antidiags_set = set()
+class Queens:
+    """
+    Classe per la risoluzione del problema delle 8 regine
+    """
+    def __init__(self, n: int = 8):
+        self.n = n
+        self.solutions = []
+        self.board = [-1] * n
 
-def is_safe(board: list[int], row:int, col:int) -> bool:
+        # array booleani
+        self.cols_used = [False] * n
+        self.diags_used = [False] * (2 * n - 1)
+        self.antidiags_used = [False] * (2 * n - 1)
+
+        self.col_range0 = range((n + 1) // 2 - 1, -1, -1)
+        self.n_meno = n - 1
+
+        # sacrifico complessità spaziale per minore complessità temporale
+        base = list(range(n))
+        self.liste = [base]
+        for i in range(1, n):
+            lista = base.copy()
+            lista[0], lista[i] = lista[i], lista[0]
+            self.liste.append(lista)
+
+        # differenzia solve_queens e find_all
+        self._find_all_flag = False
+
+    @staticmethod
+    def is_safe(board: list[int], row: int, col: int) -> bool:
+        for i in range(row):
+            # controllo una colonna alla volta
+            placed_col = board[i]
+            # controlla le colonne
+            if placed_col == col:
+                return False
+            # controlla diagonali
+            if abs(placed_col - col) == abs(i - row):
+                return False
+        return True
+
+    def solve(self) -> list[int] | None:
+        """
+        Wrapper per _find_solutions()
+        """
+        self._find_all_flag = False
+        ret = self._find_solutions()
+        if not ret:
+            return None
+        return ret[0]
+
+    def find_all(self) -> list[list[int]]:
+        """
+        Wrapper per _find_solutions()
+        """
+        self._find_all_flag = True
+        return self._find_solutions()
+
+    def _find_solutions(self) -> list[list[int]]:
+        match self.n:
+            case 0 | 2 | 3: # no sol
+                return []
+            case 1:
+                return [[0]] # [[]] perché solve poi indicizza
+
+        find_all = self._find_all_flag
+        self.solutions = []
+
+        self._backtrack(0)
+
+        if find_all: # devo specchiare le soluzioni
+            mirrored = []
+            for sol in self.solutions:
+                mirror = [self.n - 1 - col for col in sol]
+                if mirror not in self.solutions:
+                    mirrored.append(mirror)
+            self.solutions.extend(mirrored)
+
+        return self.solutions
+
+    def _backtrack(self, row: int) -> bool:
+        if row == self.n:
+            if self._find_all_flag:
+                # se devo trovare tutte le soluzioni devo appendere una copia
+                self.solutions.append(self.board.copy())
+                return False
+            else:
+                # risparmio la copia
+                self.solutions.append(self.board)
+                return True
+
+        match row:
+            case 0: # prima riga
+                for col in self.col_range0:
+                    self.board[row] = col
+                    self.cols_used[col] = True
+                    self.diags_used[col - row + self.n_meno] = True
+                    self.antidiags_used[col + row] = True
+
+                    if self._backtrack(row + 1):
+                        return True # indifferente
+
+                    # backtrack
+                    self.cols_used[col] = False
+                    self.diags_used[col - row + self.n_meno] = False
+                    self.antidiags_used[col + row] = False
+            case _: #altre righe
+                # comincio con il provare la colonna tale che la nuova queen faccia una mossa ad L dalla scorsa
+                L = (self.board[row - 1] + 2) % self.n
+                for col in self.liste[L]:
+                    if self.cols_used[col] or self.diags_used[col - row + self.n_meno] or self.antidiags_used[col + row]:
+                        continue # questa colonna non va bene
+                    else:
+                        # posiziono queen
+                        self.board[row] = col
+                        self.cols_used[col] = True
+                        self.diags_used[col - row + self.n_meno] = True
+                        self.antidiags_used[col + row] = True
+
+                        if self._backtrack(row + 1):
+                            return True
+
+                        self.cols_used[col] = False
+                        self.diags_used[col - row + self.n_meno] = False
+                        self.antidiags_used[col + row] = False
+        return False
+
+    @staticmethod
+    def board_to_string(board: list[int]) -> str:
+        stringa = ""
+        n = len(board)
+        for i in board: # per ogni riga
+            for j in range(0, n): # per ogni colonna
+                if j == i:
+                    stringa += "Q"
+                else:
+                    stringa += "."
+            stringa += '\n'
+        return stringa
+
+    @staticmethod
+    def is_valid_solution(board: list[int]) -> bool:
+        size = len(board)
+        match size:
+            case 0 | 2 | 3:
+                return False
+            case 1:
+                return not board[0]
+
+        for i in board:
+            if i >= size or i < 0:
+                return False
+
+        if len(set(board)) != size:
+            return False
+
+        dif_set = set()
+        sum_set = set()
+        for i, val in enumerate(board):
+            dif = val - i
+            sum = val + i
+            if dif in dif_set or sum in sum_set:
+                return False
+            dif_set.add(dif)
+            sum_set.add(sum)
+        return True
+
+
+# esposizione delle funzioni
+
+def is_safe(board: list[int], row: int, col: int) -> bool:
     """
     Check if a queen can be placed at position (row, col) without being threatened.
 
@@ -23,21 +189,9 @@ def is_safe(board: list[int], row:int, col:int) -> bool:
     Returns:
         bool: True if it's safe to place a queen at position (row, col), False otherwise
     """
-    for i in range(row):
-        placed_col = board[i] # controllo una colonna alla volta
+    return Queens.is_safe(board, row, col)
 
-        # controlla le colonne
-        if placed_col == col:
-            return False
-
-        # Check diagonal conflict (difference in rows == difference in cols)
-        # controlla diagonali
-        if abs(placed_col - col) == abs(i - row):
-            return False
-
-    return True
-
-def solve_queens(n:int=8) -> list[int] | None:
+def solve_queens(n: int = 8) -> list[int] | None:
     """
     Solve the n-queens problem and return a solution if one exists.
 
@@ -48,99 +202,9 @@ def solve_queens(n:int=8) -> list[int] | None:
         list or None: A 1D array representing a solution, where solution[i] is the
                      column position of the queen in row i, or None if no solution exists
     """
-    ret = _find_solutions(n,find_all=False)
-    if ret == []:
-        return None
-    else:
-        # so che ret è una lista di liste
-        return ret[0]
+    return Queens(n).solve()
 
-def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
-    match n:
-        case 0 | 2 | 3:
-            return []
-        case 1:
-            return [[0]]
-
-    solutions = []
-    board = [-1] * n
-
-    # array booleani
-    cols_used = [False] * n
-    diags_used = [False] * (2 * n - 1)
-    antidiags_used = [False] * (2 * n - 1)
-
-    col_range0 = range((n+1)//2 - 1, -1, -1) # conviene provare prima le colonne centrali: MIGLIORAMENTO NOTEVOLE
-
-    # caching delle possibili liste di colonne per ogni valore di n
-    base = list(range(n))
-    liste = [base]
-    for i in range(1,n):
-        lista = base.copy()
-        lista[0], lista[i] = lista[i], lista[0]
-        liste.append(lista)
-
-    # caching di n - 1, per non doverlo ricalcolare ogni volta
-    n_meno = n - 1
-
-    def backtrack(row: int) -> bool:
-        if row == n:
-            if find_all:
-                solutions.append(board.copy())
-                return False
-            else:
-                solutions.append(board)
-                return True
-
-        match row:
-            case 0: # prima riga
-                for col in col_range0:
-                    board[row] = col
-                    cols_used[col] = True
-                    diags_used[col - row + n - 1] = True
-                    antidiags_used[col + row] = True
-
-                    if backtrack(row + 1):
-                        return True
-
-                    # backtrack
-                    cols_used[col] = False
-                    diags_used[col - row + n_meno] = False
-                    antidiags_used[col + row] = False
-            case _: # qualsiasi altra riga
-                L = (board[row-1] + 2) % n
-                for col in liste[L]:
-                    if cols_used[col] or diags_used[col - row + n_meno] or antidiags_used[col + row]:
-                        continue
-                    else:
-                        board[row] = col
-                        cols_used[col] = True
-                        diags_used[col - row + n_meno] = True
-                        antidiags_used[col + row] = True
-
-                        if backtrack(row + 1):
-                            return True
-
-                        # backtrack
-                        cols_used[col] = False
-                        diags_used[col - row + n_meno] = False
-                        antidiags_used[col + row] = False
-        return False
-
-    backtrack(0)
-
-    if find_all:
-        mirrored = []
-        # prima mi sono fermato per non riesplorare casi simmetrici, ora devo inserire artificialmente queste soluzioni
-        for sol in solutions:
-            mirror = [n-1-col for col in sol]
-            if mirror not in solutions: # non è detto che mirror sia una nuova soluzione
-                mirrored.append(mirror)
-        solutions.extend(mirrored)
-
-    return solutions
-
-def find_all_solutions(n=8) -> list[list[int]]:
+def find_all_solutions(n: int = 8) -> list[list[int]]:
     """
     Find all solutions to the n-queens problem.
 
@@ -151,9 +215,9 @@ def find_all_solutions(n=8) -> list[list[int]]:
         list: A list of solutions, where each solution is a 1D array where
               solution[i] is the column position of the queen in row i
     """
-    return _find_solutions(n,find_all=True)
+    return Queens(n).find_all()
 
-def board_to_string(board:list[int])->str:
+def board_to_string(board: list[int]) -> str:
     """
     Convert a board configuration to a string representation.
 
@@ -164,18 +228,9 @@ def board_to_string(board:list[int])->str:
     Returns:
         str: A string representation of the board with 'Q' for queens and '.' for empty squares
     """
-    stringa = ""
-    n = len(board)
-    for i in board: # per ogni riga
-        for j in range(0,n): # per ogni colonna
-            if j == i:
-                stringa += "Q"
-            else:
-                stringa += "."
-        stringa += '\n' # newline
-    return stringa
+    return Queens.board_to_string(board)
 
-def count_solutions(n=8) -> int:
+def count_solutions(n: int = 8) -> int:
     """
     Count the number of solutions to the n-queens problem.
 
@@ -187,7 +242,7 @@ def count_solutions(n=8) -> int:
     """
     return len(find_all_solutions(n))
 
-def is_valid_solution(board:list[int])->bool:
+def is_valid_solution(board: list[int]) -> bool:
     """
     Check if a board configuration is a valid solution to the n-queens problem.
 
@@ -198,36 +253,4 @@ def is_valid_solution(board:list[int])->bool:
     Returns:
         bool: True if the board is a valid solution, False otherwise
     """
-    # la condizione che ci sia una queen per riga è già soddisfatta
-    # 1. controllo che la board sia > 3x3
-    size = len(board)
-    # -------
-    match size:
-        case 0:
-            return False
-        case 2:
-            return False
-        case 3:
-            return False
-        case 1:
-            return not board[0]
-
-    # 2. controlla che la board sia valida
-    for i in board:
-        if i >= size or i < 0: # ogni numero deve essere minore della dimensione della board [0:size-1]
-            return False
-    # 3. controlla che ci sia UNA SOLA queen per colonna
-    if len(set(board)) != size: # controllo che ogni numero appaia al più una volta
-        return False
-    # 4. controllo le diagonali
-    # O(n)
-    dif_set = set()
-    sum_set = set()
-    for i, val in enumerate(board): # per ogni riga
-        dif = val - i # questo numero può apparire una volta sola nel set delle dif
-        sum = val + i # questo numero può apparire una volta sola nel set delle sum
-        if dif in dif_set or sum in sum_set: # il numero è gia presente in lista
-            return False
-        dif_set.add(dif)
-        sum_set.add(sum)
-    return True
+    return Queens.is_valid_solution(board)
