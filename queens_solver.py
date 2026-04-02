@@ -80,10 +80,10 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
         lista[0], lista[i] = lista[i], lista[0]
         liste.append(lista)
 
-    def backtrack(row: int):
+    def backtrack(row: int) -> bool:
         if row == n:
             solutions.append(board.copy())
-            return
+            return True
 
         match row:
             case 0: # prima riga
@@ -93,9 +93,9 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
                     diags_used[col - row + n - 1] = True
                     antidiags_used[col + row] = True
 
-                    backtrack(row + 1)
-                    if not find_all and solutions:
-                        return # se sto eseguendo solve_queens devo ritornare il prima possibile
+                    if backtrack(row + 1):
+                        return True
+                    # se sto eseguendo solve_queens devo ritornare il prima possibile
 
                     # backtrack
                     cols_used[col] = False
@@ -112,14 +112,15 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
                         diags_used[col - row + n - 1] = True
                         antidiags_used[col + row] = True
 
-                        backtrack(row + 1)
-                        if not find_all and solutions:
-                            return # se sto eseguendo solve_queens devo ritornare il prima possibile
+                        if backtrack(row + 1):
+                            return True
+                        # se sto eseguendo solve_queens devo ritornare il prima possibile
 
                         # backtrack
                         cols_used[col] = False
                         diags_used[col - row + n - 1] = False
                         antidiags_used[col + row] = False
+        return False
 
     backtrack(0)
 
