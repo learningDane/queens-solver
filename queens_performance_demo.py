@@ -53,7 +53,7 @@ def calculate_performance_score(timings):
     timeout_penalty = 10.0 * len([t for t in timings.values() if t >= 30.0])
 
     # Final score (rounded to 2 decimal places)
-    score = round(base_score + timeout_penalty, 2)
+    score = round(base_score + timeout_penalty, 4)
 
     return score
 
