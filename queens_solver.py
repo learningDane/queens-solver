@@ -79,15 +79,17 @@ def _find_solutions(n: int, find_all: bool) -> list[list[int]]:
         lista = base.copy()
         lista[0], lista[i] = lista[i], lista[0]
         liste.append(lista)
+
     # caching di n - 1, per non doverlo ricalcolare ogni volta
     n_meno = n - 1
 
     def backtrack(row: int) -> bool:
         if row == n:
-            solutions.append(board.copy())
             if find_all:
+                solutions.append(board.copy())
                 return False
             else:
+                solutions.append(board)
                 return True
 
         match row:
