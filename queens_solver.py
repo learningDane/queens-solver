@@ -87,10 +87,12 @@ class Queens:
     def _backtrack(self, row: int) -> bool:
         if row == self.n:
             if self._find_all_flag:
+                # se devo trovare tutte le soluzioni devo appendere una copia
                 self.solutions.append(self.board.copy())
                 return False
             else:
-                self.solutions.append(self.board.copy())
+                # risparmio la copia
+                self.solutions.append(self.board)
                 return True
 
         match row:
@@ -139,7 +141,7 @@ class Queens:
                     stringa += "Q"
                 else:
                     stringa += "."
-            stringa += '\n' # newline
+            stringa += '\n'
         return stringa
 
     @staticmethod
@@ -173,25 +175,82 @@ class Queens:
 # esposizione delle funzioni
 
 def is_safe(board: list[int], row: int, col: int) -> bool:
-    """Check if a queen can be placed at position (row, col) without being threatened."""
+    """
+    Check if a queen can be placed at position (row, col) without being threatened.
+
+    A queen threatens another queen if they share the same row, column, or diagonal.
+
+    Parameters:
+        board (list): A 1D array where board[i] represents the column position
+                     of the queen in row i
+        row (int): The row to check
+        col (int): The column to check
+
+    Returns:
+        bool: True if it's safe to place a queen at position (row, col), False otherwise
+    """
     return Queens.is_safe(board, row, col)
 
 def solve_queens(n: int = 8) -> list[int] | None:
-    """Solve the n-queens problem and return a solution if one exists."""
+    """
+    Solve the n-queens problem and return a solution if one exists.
+
+    Parameters:
+        n (int): The size of the board and number of queens to place
+
+    Returns:
+        list or None: A 1D array representing a solution, where solution[i] is the
+                     column position of the queen in row i, or None if no solution exists
+    """
     return Queens(n).solve()
 
 def find_all_solutions(n: int = 8) -> list[list[int]]:
-    """Find all solutions to the n-queens problem."""
+    """
+    Find all solutions to the n-queens problem.
+
+    Parameters:
+        n (int): The size of the board and number of queens to place
+
+    Returns:
+        list: A list of solutions, where each solution is a 1D array where
+              solution[i] is the column position of the queen in row i
+    """
     return Queens(n).find_all()
 
 def board_to_string(board: list[int]) -> str:
-    """Convert a board configuration to a string representation."""
+    """
+    Convert a board configuration to a string representation.
+
+    Parameters:
+        board (list): A 1D array where board[i] represents the column position
+                     of the queen in row i
+
+    Returns:
+        str: A string representation of the board with 'Q' for queens and '.' for empty squares
+    """
     return Queens.board_to_string(board)
 
 def count_solutions(n: int = 8) -> int:
-    """Count the number of solutions to the n-queens problem."""
+    """
+    Count the number of solutions to the n-queens problem.
+
+    Parameters:
+        n (int): The size of the board and number of queens to place
+
+    Returns:
+        int: The number of solutions
+    """
     return len(find_all_solutions(n))
 
 def is_valid_solution(board: list[int]) -> bool:
-    """Check if a board configuration is a valid solution to the n-queens problem."""
+    """
+    Check if a board configuration is a valid solution to the n-queens problem.
+
+    Parameters:
+        board (list): A 1D array where board[i] represents the column position
+                     of the queen in row i
+
+    Returns:
+        bool: True if the board is a valid solution, False otherwise
+    """
     return Queens.is_valid_solution(board)
