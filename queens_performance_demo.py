@@ -23,7 +23,7 @@ def format_time(seconds):
         return f"{seconds:.4f} s"
 
 def test_solution(n, verbose=True):
-    """Test the olution and measure its performance"""
+    """Test the solution and measure its performance"""
     start_time = time.time()
     solution = solve_queens(n)
     elapsed = time.time() - start_time
