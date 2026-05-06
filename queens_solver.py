@@ -255,8 +255,7 @@ def _find_solutions_mod(n: int, find_all: bool) -> list[list[int]]:
     diags_used = [False] * (2 * n - 1)
     antidiags_used = [False] * (2 * n - 1)
 
-    #col_range0 = range((n+1)//2 - 1, -1, -1) # conviene provare prima le colonne centrali: MIGLIORAMENTO NOTEVOLE
-    col_range0 = range(n)
+    col_range0 = range((n+1)//2 - 1, -1, -1) # conviene provare prima le colonne centrali: MIGLIORAMENTO NOTEVOLE
 
     # caching delle possibili liste di colonne per ogni valore di n
     base = list(range(n))
@@ -325,5 +324,3 @@ def _find_solutions_mod(n: int, find_all: bool) -> list[list[int]]:
         solutions.extend(mirrored)
 
     return solutions
-
-print(board_to_string(solve_queens(32)))
