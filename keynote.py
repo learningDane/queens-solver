@@ -29,5 +29,5 @@ plt.xlabel("N")
 plt.ylabel("time to complete (ms)")
 plt.grid(True, linestyle='--'
 , alpha=0.7)
-#plt.yscale('log')
+plt.yscale('log')
 plt.show()
