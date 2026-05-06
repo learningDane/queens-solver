@@ -9,7 +9,7 @@ import time
 import platform
 import sys
 from queens_solver import (
-    solve_queens_mod as solve_queens,
+    solve_queens as solve_queens,
     board_to_string
 )
 
@@ -71,7 +71,7 @@ def main():
     #print("\n\nTesting finding a single solution:")
     #print("-" * 50)
 
-    board_sizes = range(4, 29, 2)
+    board_sizes = range(4, 33, 2)
     timings = {}
 
     for n in board_sizes:
