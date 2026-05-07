@@ -232,7 +232,7 @@ def is_valid_solution(board:list[int])->bool:
         sum_set.add(sum)
     return True
 
-def solve_queens_mod(n):
+def solve_queens_matte(n):
     if n == 1:
         return [0]
     if n in (2, 3):
