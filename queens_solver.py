@@ -232,95 +232,43 @@ def is_valid_solution(board:list[int])->bool:
         sum_set.add(sum)
     return True
 
-def solve_queens_mod(n:int=8) -> list[int] | None:
-    ret = _find_solutions_mod(n,find_all=False)
-    if ret == []:
+def solve_queens_mod(n):
+    if n == 1:
+        return [0]
+    if n in (2, 3):
         return None
-    else:
-        # so che ret è una lista di liste
-        return ret[0]
 
-def _find_solutions_mod(n: int, find_all: bool) -> list[list[int]]:
-    match n:
-        case 0 | 2 | 3:
-            return []
-        case 1:
-            return [[0]]
-
-    solutions = []
     board = [-1] * n
+    cols  = set()
+    diag1 = set()  # row - col
+    diag2 = set()  # row + col
 
-    # array booleani
-    cols_used = [False] * n
-    diags_used = [False] * (2 * n - 1)
-    antidiags_used = [False] * (2 * n - 1)
+    def count_free(row):
+        return sum(
+            1 for col in range(n)
+            if col not in cols and (row - col) not in diag1 and (row + col) not in diag2
+        )
 
-    col_range0 = range((n+1)//2 - 1, -1, -1) # conviene provare prima le colonne centrali: MIGLIORAMENTO NOTEVOLE
-
-    # caching delle possibili liste di colonne per ogni valore di n
-    base = list(range(n))
-    liste = [base]
-    for i in range(1,n):
-        lista = base.copy()
-        lista[0], lista[i] = lista[i], lista[0]
-        liste.append(lista)
-
-    # caching di n - 1, per non doverlo ricalcolare ogni volta
-    n_meno = n - 1
-
-    def backtrack(row: int) -> bool:
-        if row == n:
-            if find_all:
-                solutions.append(board.copy())
-                return False
-            else:
-                solutions.append(board)
-                return True
-
-        match row:
-            case 0: # prima riga
-                for col in col_range0:
-                    board[row] = col
-                    cols_used[col] = True
-                    diags_used[col - row + n - 1] = True
-                    antidiags_used[col + row] = True
-
-                    if backtrack(row + 1):
-                        return True
-
-                    # backtrack
-                    cols_used[col] = False
-                    diags_used[col - row + n_meno] = False
-                    antidiags_used[col + row] = False
-            case _: # qualsiasi altra riga
-                L = (board[row-1] + 2) % n
-                for col in liste[L]:
-                    if cols_used[col] or diags_used[col - row + n_meno] or antidiags_used[col + row]:
-                        continue
-                    else:
-                        board[row] = col
-                        cols_used[col] = True
-                        diags_used[col - row + n_meno] = True
-                        antidiags_used[col + row] = True
-
-                        if backtrack(row + 1):
-                            return True
-
-                        # backtrack
-                        cols_used[col] = False
-                        diags_used[col - row + n_meno] = False
-                        antidiags_used[col + row] = False
+    def solve(remaining_rows):
+        if not remaining_rows:
+            return True
+        row = min(remaining_rows, key=count_free)
+        remaining_rows.remove(row)
+        for col in range(n):
+            d1 = row - col
+            d2 = row + col
+            if col not in cols and d1 not in diag1 and d2 not in diag2:
+                board[row] = col
+                cols.add(col)
+                diag1.add(d1)
+                diag2.add(d2)
+                if solve(remaining_rows):
+                    return True
+                cols.discard(col)
+                diag1.discard(d1)
+                diag2.discard(d2)
+                board[row] = -1
+        remaining_rows.add(row)
         return False
 
-    backtrack(0)
-
-    if find_all:
-        mirrored = []
-        # prima mi sono fermato per non riesplorare casi simmetrici, ora devo inserire artificialmente queste soluzioni
-        for sol in solutions:
-            mirror = [n-1-col for col in sol]
-            if mirror not in solutions: # non è detto che mirror sia una nuova soluzione
-                mirrored.append(mirror)
-        solutions.extend(mirrored)
-
-    return solutions
+    return board if solve(set(range(n))) else None
