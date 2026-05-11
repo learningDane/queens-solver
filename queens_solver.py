@@ -169,9 +169,9 @@ def board_to_string(board:list[int])->str:
     for i in board: # per ogni riga
         for j in range(0,n): # per ogni colonna
             if j == i:
-                stringa += "Q"
+                stringa += " Q "
             else:
-                stringa += "."
+                stringa += " . "
         stringa += '\n' # newline
     return stringa
 
@@ -272,3 +272,6 @@ def solve_queens_matte(n):
         return False
 
     return board if solve(set(range(n))) else None
+
+
+print(board_to_string(solve_queens(28)))

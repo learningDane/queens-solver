@@ -1,3 +1,7 @@
+from __future__ import annotations
+from typing import Optional, Iterator
+import time
+from matplotlib import pyplot as plt
 """
 N-Queens Problem Solver - Object Oriented Implementation
 
@@ -15,9 +19,6 @@ Performance characteristics:
     - O(n!) worst case but heavily pruned in practice
     - O(n) memory usage
 """
-
-from __future__ import annotations
-from typing import Optional, Iterator
 
 
 class QueensBoard:
@@ -521,3 +522,29 @@ def is_valid_solution(board: list[int]) -> bool:
         bool: True if the placement is valid, False otherwise.
     """
     return QueensSolver(len(board)).is_valid(board)
+
+
+
+
+X = [20]
+Y = []
+while True:
+    start_time = time.time()
+    solution = solve_queens(X[len(X)-1])
+    elapsed = time.time() - start_time
+    #Y[i] = round(time_tot/4, 3)
+    print(f"claudeo {X[len(X)-1]}x{X[len(X)-1]}: {elapsed*1000} ms")
+    Y.append((elapsed)*1000)
+    if elapsed > 0.05:
+        break
+    X.append(X[len(X)-1]+2000)
+
+plt.plot(X,Y, label="Claude")
+plt.title("Average time of solution found")
+plt.xlabel("N")
+plt.ylabel("time to complete (ms)")
+plt.grid(True, linestyle='--'
+, alpha=0.7)
+#plt.xscale('log')
+plt.legend()
+plt.show()
